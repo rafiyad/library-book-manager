@@ -211,7 +211,7 @@ def borrow_book(book_id):
         return jsonify({"error": "Book is already borrowed"}), 409
         
         # The request body must include who is borrowing it
-        data = request.get_json(silent=True)
+    data = request.get_json(silent=True)
 
     borrower_name = None
     if isinstance(data, dict):
