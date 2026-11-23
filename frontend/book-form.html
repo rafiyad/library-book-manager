@@ -1,0 +1,65 @@
+<h2 class="mb-3" ng-if="!isEdit">Add Book</h2>
+<h2 class="mb-3" ng-if="isEdit">Edit Book</h2>
+
+<div class="alert alert-danger" ng-if="errorMessage">
+  {{ errorMessage }}
+</div>
+
+<div class="text-center my-3" ng-if="loading">
+  <div class="spinner-border" role="status"></div>
+  <p>Loading book...</p>
+</div>
+
+<div class="row">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <form name="bookForm" novalidate ng-submit="save(bookForm)" ng-show="!loading">
+
+      <div class="mb-3">
+        <label class="form-label" for="title">Title *</label>
+        <input type="text" id="title" name="title" class="form-control"
+               ng-model="book.title"
+               required
+               ng-class="{ 'is-invalid': (bookForm.title.$touched || bookForm.$submitted) && bookForm.title.$invalid }">
+        <div class="invalid-feedback">Title is required.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="author">Author *</label>
+        <input type="text" id="author" name="author" class="form-control"
+               ng-model="book.author"
+               required
+               ng-class="{ 'is-invalid': (bookForm.author.$touched || bookForm.$submitted) && bookForm.author.$invalid }">
+        <div class="invalid-feedback">Author is required.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="category">Category</label>
+        <select id="category" name="category" class="form-select" ng-model="book.category">
+          <option value="">No category</option>
+          <option ng-repeat="category in categories" value="{{ category }}">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="year">Published year</label>
+        <input type="number" id="year" name="year" class="form-control"
+               ng-model="book.published_year"
+               min="1900"
+               ng-max="currentYear"
+               step="1"
+               ng-class="{ 'is-invalid': (bookForm.year.$touched || bookForm.$submitted) && bookForm.year.$invalid }">
+        <div class="invalid-feedback">
+          Year must be a whole number between 1900 and {{ currentYear }}.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" ng-disabled="saving">Save</button>
+      <a class="btn btn-secondary" href="#!/books">Cancel</a>
+
+    </form>
+
+  </div>
+</div>

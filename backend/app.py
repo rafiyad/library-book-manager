@@ -191,7 +191,7 @@ def borrow_book(book_id):
     # Can't borrow a book that someone already has
     if book["is_borrowed"]:
         conn.close()
-        return jsonify({"error": "Book is already borrowed"}), 400
+        return jsonify({"error": "Book is already borrowed"}), 409
 
     # The request body must include who is borrowing it
     borrower_name = request.json.get("borrower_name")

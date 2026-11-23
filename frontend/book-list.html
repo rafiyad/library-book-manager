@@ -1,0 +1,84 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Books</h2>
+  <a class="btn btn-primary" href="#!/books/new">Add Book</a>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-12 col-md-8">
+    <input type="text"
+           class="form-control"
+           placeholder="Search by title or author"
+           ng-model="filters.search"
+           ng-model-options="{ debounce: 300 }"
+           ng-change="loadBooks()">
+  </div>
+  <div class="col-12 col-md-4">
+    <select class="form-select"
+            ng-model="filters.category"
+            ng-change="loadBooks()">
+      <option value="">All categories</option>
+      <option ng-repeat="category in categories" value="{{ category }}">
+        {{ category }}
+      </option>
+    </select>
+  </div>
+</div>
+
+<div class="alert alert-danger" ng-if="errorMessage">
+  {{ errorMessage }}
+</div>
+
+<div class="text-center my-3" ng-if="loading">
+  <div class="spinner-border" role="status"></div>
+  <p>Loading books...</p>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Category</th>
+        <th>Year</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="book in books">
+        <td>{{ book.title }}</td>
+        <td>{{ book.author }}</td>
+        <td>{{ book.category }}</td>
+        <td>{{ book.published_year }}</td>
+        <td>
+          <span class="badge bg-warning text-dark" ng-if="book.is_borrowed">
+            Borrowed by {{ book.borrower_name }}
+          </span>
+          <span class="badge bg-success" ng-if="!book.is_borrowed">
+            Available
+          </span>
+        </td>
+        <td class="text-nowrap">
+          <button class="btn btn-sm btn-outline-primary"
+                  ng-if="!book.is_borrowed"
+                  ng-click="borrowBook(book)">Borrow</button>
+
+          <button class="btn btn-sm btn-outline-success"
+                  ng-if="book.is_borrowed"
+                  ng-click="returnBook(book)">Return</button>
+
+          <a class="btn btn-sm btn-outline-secondary"
+             ng-href="#!/books/{{ book.id }}/edit">Edit</a>
+
+          <button class="btn btn-sm btn-outline-danger"
+                  ng-disabled="book.is_borrowed"
+                  ng-click="deleteBook(book)">Delete</button>
+        </td>
+      </tr>
+      <tr ng-if="!loading && books.length === 0">
+        <td colspan="6" class="text-center">No books found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -40,4 +40,4 @@ def test_borrow_book(client):
     assert res.get_json()["borrower_name"] == "Alice"
 
     res = client.post(f"/api/books/{book_id}/borrow", json={"borrower_name": "Bob"})
-    assert res.status_code == 400
+    assert res.status_code == 409
