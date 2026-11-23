@@ -2,11 +2,28 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from db import get_db_connection, init_db
 from datetime import date
+from werkzeug.exceptions import HTTPException
 
 
 app = Flask(__name__)
 CORS(app)  # Allow the frontend (on a different port) to call this API
 init_db()  # Initialize the database when the app starts
+
+
+
+# Runs for any unexpected crash in the code
+@app.errorhandler(Exception)
+def handle_unexpected_error(error):
+    return jsonify({"error": "Something went wrong on the server"}), 500
+
+@app.errorhandler(HTTPException)
+def handle_http_error(error):
+    messages = {
+        404: "Not found",
+        405: "Method not allowed",
+    }
+    message = messages.get(error.code, error.description)
+    return jsonify({"error": message}), error.code
 
 
 # Convert a database row into a plain dict so it can be returned as JSON
@@ -167,13 +184,13 @@ def delete_book(book_id):
         return jsonify({"error": "Book not found"}), 404
     if find_book(conn, book_id)["is_borrowed"]:
         conn.close()
-        return jsonify({"error": "Cannot delete a borrowed book"}), 400
+        return jsonify({"error": "Cannot delete a borrowed book"}), 409
 
     conn.execute("DELETE FROM books WHERE id = ?", (book_id,))
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Book deleted successfully"}), 204
+    return "", 204
 
 
 
@@ -192,12 +209,17 @@ def borrow_book(book_id):
     if book["is_borrowed"]:
         conn.close()
         return jsonify({"error": "Book is already borrowed"}), 409
+        
+        # The request body must include who is borrowing it
+        data = request.get_json(silent=True)
 
-    # The request body must include who is borrowing it
-    borrower_name = request.json.get("borrower_name")
-    if not borrower_name or not isinstance(borrower_name, str):
+    borrower_name = None
+    if isinstance(data, dict):
+        borrower_name = data.get("borrower_name")
+
+    if not isinstance(borrower_name, str) or borrower_name.strip() == "":
         conn.close()
-        return jsonify({"error": "Borrower name is required and must be a string"}), 400
+        return jsonify({"error": "Borrower name is required"}), 400
 
     # Flag the book as borrowed and record the borrower
     conn.execute(
